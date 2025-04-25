@@ -94,6 +94,12 @@ const PropertyKeyDefinition string = "definition"
 const PropertyKeyHasCaptions string = "has_captions"
 const PropertyKeyTags string = "tags"
 
+// Twitter properties
+const PropertyKeyTweetID string = "tweet_id"
+const PropertyKeyUsername string = "username"
+const PropertyKeyAuthorName string = "author_name"
+const PropertyKeyRetweetCount string = "retweet_count"
+
 // Email properties
 const PropertyKeyEmailID string = "email_id"
 const PropertyKeyThreadID string = "thread_id"
@@ -154,6 +160,12 @@ var propertyTypes = map[string]PropertyType{
 	PropertyKeyDefinition:   TypeString,
 	PropertyKeyHasCaptions:  TypeBool,
 	PropertyKeyTags:         TypeStringArray,
+
+	// Twitter properties
+	PropertyKeyTweetID:      TypeString,
+	PropertyKeyUsername:     TypeString,
+	PropertyKeyAuthorName:   TypeString,
+	PropertyKeyRetweetCount: TypeInt,
 
 	// Email properties
 	PropertyKeyEmailID:     TypeString,

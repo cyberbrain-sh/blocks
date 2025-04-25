@@ -22,6 +22,7 @@ const (
 	TypeMovie     DataType = "movie"
 	TypeInstagram DataType = "instagram"
 	TypeYouTube   DataType = "youtube"
+	TypeTwitter   DataType = "twitter"
 	TypeSeries    DataType = "series"
 	// add all text blocks as well once we are ready
 	TypeParagraph        DataType = "paragraph"
@@ -51,6 +52,7 @@ func (d DataType) IsValid() bool {
 		TypeMovie,
 		TypeInstagram,
 		TypeYouTube,
+		TypeTwitter,
 		TypeSeries,
 		TypeParagraph,
 		TypeHeader1,
@@ -68,7 +70,7 @@ func (d DataType) IsValid() bool {
 
 func (d DataType) ContentType() string {
 	switch d {
-	case TypeMovie, TypeSeries, TypeLink, TypeToDo, TypeEmail:
+	case TypeMovie, TypeSeries, TypeLink, TypeToDo, TypeEmail, TypeYouTube, TypeInstagram, TypeTwitter:
 		return "structural"
 	}
 	return "textual"
