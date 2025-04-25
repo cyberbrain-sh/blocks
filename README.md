@@ -210,6 +210,131 @@ if title, exists := block.Properties.GetString(pkg.PropertyKeyTitle); exists {
 block.Properties.ReplaceValue(pkg.PropertyKeyChecked, true)
 ```
 
+## Entity-Specific Properties
+
+Each block type represents a specific real-world entity and therefore has its own set of specialized properties reflecting the unique attributes of that entity type. The system provides helper functions for adding, retrieving, and rendering these type-specific properties.
+
+### Movie Block Properties
+
+Movie blocks represent film entities with properties like:
+
+- **Basic Information**: title, description, image URL, original URL
+- **Identifiers**: IMDB ID, TMDB ID
+- **Film Details**: release year, rating, runtime, tagline
+- **Financial Data**: budget, revenue
+- **People**: directors, cast members
+- **Categorization**: genres
+
+```go
+// Example: Creating a Movie block
+movieBlock := pkg.NewEmptyBlock()
+movieBlock.Type = pkg.TypeMovie
+
+// Set movie-specific properties
+title := "The Matrix"
+year := 1999
+rating := "8.7"
+runtime := "136 min"
+directors := []string{"Lana Wachowski", "Lilly Wachowski"}
+genres := []string{"Action", "Sci-Fi"}
+
+pkg.AddMovieProperties(&movieBlock, 
+    &title,                  // title
+    nil,                     // description
+    nil,                     // imageURL
+    nil,                     // url 
+    nil,                     // imdbID
+    nil,                     // tmdbID
+    &year,                   // releaseYear
+    &rating,                 // rating
+    &runtime,                // runtime
+    nil,                     // tagline
+    nil,                     // budget
+    nil,                     // revenue
+    &genres,                 // genres
+    &directors,              // directors
+    nil,                     // cast
+    nil,                     // checked
+    true)                    // enriched
+
+// Render the movie block to a human-readable format
+renderedMovie := pkg.RenderMovieProperties(movieBlock)
+// Output:
+// # The Matrix (1999)
+// **Rating: ⭐ 8.7 | Runtime: 136 min**
+// **Genres:** Action, Sci-Fi
+// **Directors:** Lana Wachowski, Lilly Wachowski
+```
+
+### Email Block Properties
+
+Email blocks represent email messages with properties like:
+
+- **Message Identifiers**: email ID, thread ID
+- **Participants**: from, to
+- **Content**: subject, body text
+- **Timing**: date, received at
+- **Organization**: attachments, labels
+
+```go
+// Example: Creating an Email block
+emailBlock := pkg.NewEmptyBlock()
+emailBlock.Type = pkg.TypeEmail
+
+// Set email-specific properties
+emailID := "msg_123456"
+from := "sender@example.com"
+to := "recipient@example.com"
+subject := "Meeting Tomorrow"
+text := "Hi there,\n\nLet's meet tomorrow at 2 PM.\n\nRegards,\nSender"
+date := time.Now()
+labels := []string{"Important", "Work"}
+
+pkg.AddEmailProperties(&emailBlock,
+    &emailID,               // emailID
+    nil,                    // threadID
+    &from,                  // from
+    &to,                    // to
+    &subject,               // subject
+    &text,                  // text
+    &date,                  // date
+    nil,                    // receivedAt
+    nil,                    // attachments
+    &labels)                // labels
+
+// Render the email block to a human-readable format
+renderedEmail := pkg.RenderEmailProperties(emailBlock)
+// Output:
+// ## Meeting Tomorrow
+// **From:** sender@example.com
+// **To:** recipient@example.com
+// **Date:** Jul 20, 2023 3:45 PM
+// **Labels:** `Important` `Work`
+// ---
+// Hi there,
+//
+// Let's meet tomorrow at 2 PM.
+//
+// Regards,
+// Sender
+```
+
+### Other Entity Types
+
+Similar specialized property sets exist for other entity types:
+
+- **YouTube Videos**: video ID, channel information, view counts, etc.
+- **Series**: seasons, episodes, networks, etc.
+- **ToDo Items**: checked status, due dates, etc.
+- **Instagram Posts**: post ID, caption, like count, etc.
+
+Each entity type has dedicated functions for:
+- Adding properties (`Add[Type]Properties`)
+- Rendering to human-readable format (`Render[Type]Properties`)
+- Getting a list of available properties (`Get[Type]Properties`)
+
+This type-specific approach enables the blocks system to accurately model diverse real-world entities while maintaining a consistent interface for working with all block types.
+
 ## License
 
 [License Information]
