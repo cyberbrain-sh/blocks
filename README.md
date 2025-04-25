@@ -1,10 +1,14 @@
 # Blocks
 
-A powerful and flexible block-based content management system developed by [Cyberbrain](https://github.com/cyberbrain-sh).
+A powerful and flexible entity-based content management system developed by [Cyberbrain](https://github.com/cyberbrain-sh).
 
 ## Overview
 
-Blocks is a Go library that provides a versatile foundation for managing structured content as interconnected blocks. It enables the creation, manipulation, and organization of various content types within a unified data model. The system supports a wide range of content types including text, to-do items, links, emails, media (YouTube, Instagram), movies, and series information.
+Blocks is a Go library that provides a versatile foundation for managing structured content as interconnected entity blocks. Unlike traditional block-based systems that focus only on layout and formatting, Blocks represents meaningful real-world entities such as movies, TV series, YouTube videos, Instagram posts, emails, and more.
+
+Each block encapsulates a specific entity type with its relevant metadata, properties, and relationships. This enables rich content modeling beyond simple text formatting, allowing applications to work with semantically meaningful content units that map directly to real-world objects and concepts.
+
+The system supports a wide range of entity types within a unified data model, enabling complex applications that can intelligently process, organize, and present rich media and structured information.
 
 ## Features
 
@@ -44,13 +48,13 @@ block.Type = pkg.TypeParagraph
 
 ## Block Types
 
-The library supports various block types including:
+The library supports two main categories of block types:
 
-- **Structural Blocks**: Page, Fragment, Database
-- **Text Blocks**: Paragraph, Headers (1-6), Bullet List Items, Numbered List Items
-- **Task Blocks**: To-Do Items
-- **Media Blocks**: Image, Video, Audio, File, YouTube, Instagram
-- **Reference Blocks**: Link, Email, Movie, Series
+- **Structural Blocks**: Content blocks with complex structure and rich metadata
+  - Movie, Series, Link, ToDo, Email, Page, Database, YouTube, Instagram, Fragment
+
+- **Textual Blocks**: Simple content containers primarily for text
+  - Paragraph, Headers (1-6), Bullet List Items, Numbered List Items, Image, Video, Audio, File
 
 ## Properties
 
