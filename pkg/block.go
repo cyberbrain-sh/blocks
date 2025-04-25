@@ -41,7 +41,7 @@ type Block struct {
 	UpdatedAt         time.Time       `json:"updated_at"`
 
 	// generated content for embeddings
-	calculatedContent string
+	CalculatedContent string
 }
 
 func (b *Block) IsEmpty() bool {
