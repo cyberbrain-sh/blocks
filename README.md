@@ -56,6 +56,146 @@ The library supports two main categories of block types:
 - **Textual Blocks**: Simple content containers primarily for text
   - Paragraph, Headers (1-6), Bullet List Items, Numbered List Items, Image, Video, Audio, File
 
+## Block Connectivity and Hierarchy
+
+Blocks connect to each other in a hierarchical structure, creating a flexible and powerful content graph:
+
+### Parent-Child Relationships
+
+Each block maintains both upward and downward references:
+
+- **Parent Reference**: Each block (except root blocks) contains a `ParentID` field that points to its parent block. This creates an upward link in the hierarchy.
+- **Child References**: Blocks contain a `Content` array of UUIDs that points to their direct children, creating downward links in the hierarchy.
+
+```go
+// Example parent-child relationship
+parentBlock := pkg.NewEmptyBlock()
+
+childBlock := pkg.NewEmptyBlock()
+childBlock.ParentID = &parentBlock.ID  // Child points to parent
+
+parentBlock.AppendChild(childBlock.ID) // Parent includes child in its Content array
+```
+
+### Hierarchy Operations
+
+The Block struct provides methods for managing these relationships:
+
+- `AppendChild(id uuid.UUID)` - Adds a child to the end of the Content array
+- `RemoveChild(id uuid.UUID)` - Removes a child from the Content array
+- `InsertChild(id uuid.UUID, afterID uuid.UUID)` - Inserts a child at a specific position
+
+### Recursive Relationships
+
+For efficient traversal and operations, blocks also maintain:
+
+- `ChildrenRecursive []uuid.UUID` - Contains all descendants (children, grandchildren, etc.)
+- `RootParentID *uuid.UUID` - Points to the topmost ancestor in the hierarchy
+
+This dual-reference system (parent references and child content arrays) allows for:
+- Fast bidirectional traversal of the content tree
+- Easy restructuring of content hierarchies
+- Efficient querying of both ancestors and descendants
+
+### Block Hierarchy Diagram
+
+The following diagram illustrates the block hierarchy structure:
+
+```mermaid
+flowchart TD
+    %% Define the root block with full details
+    Root["ROOT BLOCK (Page/Database)
+    ------------------
+    ID: uuid-root
+    ParentID: nil
+    RootParentID: nil
+    Content: [uuid-child1, uuid-child2, uuid-child3]
+    ChildrenRecursive: [all descendant IDs...]"]
+    
+    %% Define child blocks
+    Child1["CHILD BLOCK 1 (Structural)
+    ------------------
+    ID: uuid-child1
+    ParentID: uuid-root
+    RootParentID: uuid-root
+    Content: [uuid-gc1, uuid-gc2]"]
+    
+    Child2["CHILD BLOCK 2 (Textual)
+    ------------------
+    ID: uuid-child2
+    ParentID: uuid-root
+    RootParentID: uuid-root
+    Content: []"]
+    
+    Child3["CHILD BLOCK 3 (Structural)
+    ------------------
+    ID: uuid-child3
+    ParentID: uuid-root
+    RootParentID: uuid-root
+    Content: [uuid-gc3]"]
+    
+    %% Define grandchild blocks
+    GrandChild1["GRANDCHILD 1 (ToDo)
+    ------------------
+    ID: uuid-gc1
+    ParentID: uuid-child1
+    RootParentID: uuid-root"]
+    
+    GrandChild2["GRANDCHILD 2 (Email)
+    ------------------
+    ID: uuid-gc2
+    ParentID: uuid-child1
+    RootParentID: uuid-root"]
+    
+    GrandChild3["GRANDCHILD 3 (YouTube)
+    ------------------
+    ID: uuid-gc3
+    ParentID: uuid-child3
+    RootParentID: uuid-root"]
+    
+    %% Define relationships - downward through Content array
+    Root -->|"Content[0]"| Child1
+    Root -->|"Content[1]"| Child2
+    Root -->|"Content[2]"| Child3
+    
+    Child1 -->|"Content[0]"| GrandChild1
+    Child1 -->|"Content[1]"| GrandChild2
+    Child3 -->|"Content[0]"| GrandChild3
+    
+    %% Define upward relationships - through ParentID
+    GrandChild1 -.->|"ParentID"| Child1
+    GrandChild2 -.->|"ParentID"| Child1
+    GrandChild3 -.->|"ParentID"| Child3
+    
+    Child1 -.->|"ParentID"| Root
+    Child2 -.->|"ParentID"| Root
+    Child3 -.->|"ParentID"| Root
+    
+    %% Define RootParentID relationships with different style
+    GrandChild1 -.-|"RootParentID"| Root
+    GrandChild2 -.-|"RootParentID"| Root
+    GrandChild3 -.-|"RootParentID"| Root
+    
+    %% Add styling
+    classDef root fill:#f9f,stroke:#333,stroke-width:2px
+    classDef child fill:#bbf,stroke:#333,stroke-width:1px
+    classDef grandchild fill:#dfd,stroke:#333,stroke-width:1px
+    
+    class Root root
+    class Child1,Child2,Child3 child
+    class GrandChild1,GrandChild2,GrandChild3 grandchild
+```
+
+The diagram shows:
+- **Root Block**: A page or database with no parent
+- **Solid Arrows** (→): Represent downward references via the Content array
+- **Dashed Arrows** (⇢): Represent upward references via ParentID
+- **Dotted-Dashed Arrows** (-.-): Represent direct RootParentID references to the root
+- Each block contains its key fields including ID, ParentID, RootParentID, and Content
+- Different colored blocks represent different levels in the hierarchy
+
+This structure enables both upward traversal (via ParentID) and downward traversal (via Content array) through the block hierarchy.
+
 ## Properties
 
 Blocks have type-specific properties that can be accessed and modified:
