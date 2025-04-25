@@ -29,21 +29,21 @@ go get github.com/cyberbrain-sh/blocks
 ## Usage
 
 ```go
-import "github.com/cyberbrain-sh/blocks/pkg"
+import "github.com/cyberbrain-sh/blocks"
 
 // Create a new empty block
-block := pkg.NewEmptyBlock()
+block := blocks.NewEmptyBlock()
 
 // Set properties
-block.Properties.ReplaceValue(pkg.PropertyKeyTitle, "My Block")
-block.Properties.ReplaceValue(pkg.PropertyKeyText, "This is a sample block")
+block.Properties.ReplaceValue(blocks.PropertyKeyTitle, "My Block")
+block.Properties.ReplaceValue(blocks.PropertyKeyText, "This is a sample block")
 
 // Add a child block
 childID := uuid.New()
 block.AppendChild(childID)
 
 // Change block type
-block.Type = pkg.TypeParagraph
+block.Type = blocks.TypeParagraph
 ```
 
 ## Block Types
@@ -69,9 +69,9 @@ Each block maintains both upward and downward references:
 
 ```go
 // Example parent-child relationship
-parentBlock := pkg.NewEmptyBlock()
+parentBlock := blocks.NewEmptyBlock()
 
-childBlock := pkg.NewEmptyBlock()
+childBlock := blocks.NewEmptyBlock()
 childBlock.ParentID = &parentBlock.ID  // Child points to parent
 
 parentBlock.AppendChild(childBlock.ID) // Parent includes child in its Content array
@@ -202,12 +202,12 @@ Blocks have type-specific properties that can be accessed and modified:
 
 ```go
 // Get a string property
-if title, exists := block.Properties.GetString(pkg.PropertyKeyTitle); exists {
+if title, exists := block.Properties.GetString(blocks.PropertyKeyTitle); exists {
     fmt.Println("Title:", title)
 }
 
 // Set a property
-block.Properties.ReplaceValue(pkg.PropertyKeyChecked, true)
+block.Properties.ReplaceValue(blocks.PropertyKeyChecked, true)
 ```
 
 ## Entity-Specific Properties
@@ -227,8 +227,8 @@ Movie blocks represent film entities with properties like:
 
 ```go
 // Example: Creating a Movie block
-movieBlock := pkg.NewEmptyBlock()
-movieBlock.Type = pkg.TypeMovie
+movieBlock := blocks.NewEmptyBlock()
+movieBlock.Type = blocks.TypeMovie
 
 // Set movie-specific properties
 title := "The Matrix"
@@ -238,7 +238,7 @@ runtime := "136 min"
 directors := []string{"Lana Wachowski", "Lilly Wachowski"}
 genres := []string{"Action", "Sci-Fi"}
 
-pkg.AddMovieProperties(&movieBlock, 
+blocks.AddMovieProperties(&movieBlock, 
     &title,                  // title
     nil,                     // description
     nil,                     // imageURL
@@ -258,7 +258,7 @@ pkg.AddMovieProperties(&movieBlock,
     true)                    // enriched
 
 // Render the movie block to a human-readable format
-renderedMovie := pkg.RenderMovieProperties(movieBlock)
+renderedMovie := blocks.RenderMovieProperties(movieBlock)
 // Output:
 // # The Matrix (1999)
 // **Rating: ⭐ 8.7 | Runtime: 136 min**
@@ -278,8 +278,8 @@ Email blocks represent email messages with properties like:
 
 ```go
 // Example: Creating an Email block
-emailBlock := pkg.NewEmptyBlock()
-emailBlock.Type = pkg.TypeEmail
+emailBlock := blocks.NewEmptyBlock()
+emailBlock.Type = blocks.TypeEmail
 
 // Set email-specific properties
 emailID := "msg_123456"
@@ -290,7 +290,7 @@ text := "Hi there,\n\nLet's meet tomorrow at 2 PM.\n\nRegards,\nSender"
 date := time.Now()
 labels := []string{"Important", "Work"}
 
-pkg.AddEmailProperties(&emailBlock,
+blocks.AddEmailProperties(&emailBlock,
     &emailID,               // emailID
     nil,                    // threadID
     &from,                  // from
@@ -303,7 +303,7 @@ pkg.AddEmailProperties(&emailBlock,
     &labels)                // labels
 
 // Render the email block to a human-readable format
-renderedEmail := pkg.RenderEmailProperties(emailBlock)
+renderedEmail := blocks.RenderEmailProperties(emailBlock)
 // Output:
 // ## Meeting Tomorrow
 // **From:** sender@example.com

@@ -1,4 +1,4 @@
-package pkg
+package blocks
 
 type LifecycleStatus string
 

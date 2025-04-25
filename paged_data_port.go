@@ -1,4 +1,4 @@
-package pkg
+package blocks
 
 // PageData defines an interface for objects that can be converted to DataMovie
 // This avoids direct dependency on scrappers.Page type while allowing conversion

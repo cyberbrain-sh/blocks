@@ -1,10 +1,12 @@
-package pkg
+package blocks
 
-import "fmt"
+import (
+	"fmt"
+)
 
-func AddParagraphProperties(b *Block, title *string) error {
+func AddNumberedListItemProperties(b *Block, title *string) error {
 	if b == nil {
-		return fmt.Errorf("cannot add paragraph properties because given b is nil")
+		return fmt.Errorf("cannot add bullet list item properties because given b is nil")
 	}
 
 	if title != nil {
@@ -16,7 +18,7 @@ func AddParagraphProperties(b *Block, title *string) error {
 	return nil
 }
 
-func RenderParagraphProperties(b Block) string {
+func RenderNumberedListItemProperties(b Block) string {
 	text, ok := b.Properties.Get(PropertyKeyTitle)
 	if !ok {
 		text = ""
@@ -30,7 +32,7 @@ func RenderParagraphProperties(b Block) string {
 	return textString
 }
 
-func GetParagraphProperties() []string {
+func GetNumberedListItemProperties() []string {
 	return []string{
 		PropertyKeyTitle,
 	}
