@@ -94,11 +94,24 @@ const PropertyKeyDefinition string = "definition"
 const PropertyKeyHasCaptions string = "has_captions"
 const PropertyKeyTags string = "tags"
 
-// Twitter properties
+// Tweet properties
 const PropertyKeyTweetID string = "tweet_id"
 const PropertyKeyUsername string = "username"
 const PropertyKeyAuthorName string = "author_name"
 const PropertyKeyRetweetCount string = "retweet_count"
+const PropertyKeyAuthorID string = "author_id"
+const PropertyKeyMediaURLs string = "media_urls"
+const PropertyKeyMediaInfo string = "media_info"
+const PropertyKeyExternalURLs string = "external_urls"
+const PropertyKeyQuoteCount string = "quote_count"
+const PropertyKeyConversationID string = "conversation_id"
+const PropertyKeyLanguage string = "language"
+const PropertyKeySource string = "source"
+const PropertyKeyHasMedia string = "has_media"
+const PropertyKeyMediaCount string = "media_count"
+const PropertyKeyIsRetweet string = "is_retweet"
+const PropertyKeyIsReply string = "is_reply"
+const PropertyKeyIsQuote string = "is_quote"
 
 // Email properties
 const PropertyKeyEmailID string = "email_id"
@@ -161,11 +174,24 @@ var propertyTypes = map[string]PropertyType{
 	PropertyKeyHasCaptions:  TypeBool,
 	PropertyKeyTags:         TypeStringArray,
 
-	// Twitter properties
-	PropertyKeyTweetID:      TypeString,
-	PropertyKeyUsername:     TypeString,
-	PropertyKeyAuthorName:   TypeString,
-	PropertyKeyRetweetCount: TypeInt,
+	// Tweet properties
+	PropertyKeyTweetID:        TypeString,
+	PropertyKeyUsername:       TypeString,
+	PropertyKeyAuthorName:     TypeString,
+	PropertyKeyRetweetCount:   TypeInt,
+	PropertyKeyAuthorID:       TypeString,
+	PropertyKeyMediaURLs:      TypeStringArray,
+	PropertyKeyMediaInfo:      TypeStringArray,
+	PropertyKeyExternalURLs:   TypeStringArray,
+	PropertyKeyQuoteCount:     TypeInt,
+	PropertyKeyConversationID: TypeString,
+	PropertyKeyLanguage:       TypeString,
+	PropertyKeySource:         TypeString,
+	PropertyKeyHasMedia:       TypeBool,
+	PropertyKeyMediaCount:     TypeInt,
+	PropertyKeyIsRetweet:      TypeBool,
+	PropertyKeyIsReply:        TypeBool,
+	PropertyKeyIsQuote:        TypeBool,
 
 	// Email properties
 	PropertyKeyEmailID:     TypeString,
