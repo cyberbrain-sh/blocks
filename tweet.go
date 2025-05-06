@@ -1,6 +1,7 @@
 package blocks
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -523,4 +524,37 @@ func GetTweetProperties() []string {
 		PropertyKeyIsQuote,        // Whether it's a quote tweet
 		PropertyKeyEnriched,       // Whether the tweet has been enriched
 	}
+}
+
+// ParseTweetDataFromJSON parses a json.RawMessage into a structured.DataTweet struct
+func ParseTweetDataFromJSON(rawJSON json.RawMessage) (*structured.DataTweet, error) {
+	if len(rawJSON) == 0 {
+		return nil, fmt.Errorf("cannot parse tweet data from empty JSON")
+	}
+
+	var tweetData structured.DataTweet
+	if err := json.Unmarshal(rawJSON, &tweetData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tweet data: %w", err)
+	}
+
+	return &tweetData, nil
+}
+
+// AddTweetPropertiesFromJSON parses a json.RawMessage into a structured.DataTweet struct
+// and adds the tweet properties to the given block
+func AddTweetPropertiesFromJSON(block *Block, rawJSON json.RawMessage) error {
+	if block == nil {
+		return fmt.Errorf("cannot add tweet properties because given block is nil")
+	}
+
+	if len(rawJSON) == 0 {
+		return fmt.Errorf("cannot add tweet properties because given JSON is empty")
+	}
+
+	tweetData, err := ParseTweetDataFromJSON(rawJSON)
+	if err != nil {
+		return fmt.Errorf("failed to parse tweet data from JSON: %w", err)
+	}
+
+	return AddTweetPropertiesFromDataTweet(block, tweetData)
 }
