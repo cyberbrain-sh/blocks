@@ -127,9 +127,7 @@ func AddTweetPropertiesFromDataTweet(block *Block, tweet *structured.DataTweet) 
 	}
 
 	// Reset media info array field with empty array
-	if err := block.Properties.ReplaceValue(PropertyKeyMediaInfo, []string{}); err != nil {
-		return fmt.Errorf("failed to reset media info property: %w", err)
-	}
+	block.Properties.Delete(PropertyKeyMediaInfo)
 
 	// Store media details as strings if available
 	if len(tweet.Media) > 0 {
@@ -142,9 +140,7 @@ func AddTweetPropertiesFromDataTweet(block *Block, tweet *structured.DataTweet) 
 	}
 
 	// Reset external URLs array field with empty array
-	if err := block.Properties.ReplaceValue(PropertyKeyExternalURLs, []string{}); err != nil {
-		return fmt.Errorf("failed to reset external URLs property: %w", err)
-	}
+	block.Properties.Delete(PropertyKeyExternalURLs)
 
 	// Store external URLs if available
 	if len(tweet.ExternalURLs) > 0 {
