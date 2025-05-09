@@ -27,7 +27,7 @@ func NewBlockFromMarkdown(markdown string) (Block, error) {
 		return block, nil
 	}
 
-	// Check for links [text](url)
+	// Check for markdown links [text](url)
 	linkPattern := regexp.MustCompile(`^\[(.*?)\]\((.*?)\)$`)
 	if matches := linkPattern.FindStringSubmatch(markdown); len(matches) == 3 {
 		block.Type = TypeLink
@@ -35,6 +35,18 @@ func NewBlockFromMarkdown(markdown string) (Block, error) {
 		url := matches[2]
 		enriched := false
 		if err := AddLinkProperties(&block, &url, &text, nil, nil, enriched); err != nil {
+			return block, fmt.Errorf("failed to add link properties: %w", err)
+		}
+		return block, nil
+	}
+
+	// Check for plain URLs (http://, https://, ftp://)
+	urlPattern := regexp.MustCompile(`^(https?|ftp)://\S+$`)
+	if urlPattern.MatchString(markdown) {
+		block.Type = TypeLink
+		url := markdown
+		// Use the URL as the title as well
+		if err := AddLinkProperties(&block, &url, &url, nil, nil, false); err != nil {
 			return block, fmt.Errorf("failed to add link properties: %w", err)
 		}
 		return block, nil

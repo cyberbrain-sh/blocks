@@ -138,7 +138,7 @@ func TestNewBlockFromMarkdown(t *testing.T) {
 			expectedTitle: "1.Not a numbered list",
 			expectError:   false,
 		},
-		// New test cases for links
+		// Test cases for links
 		{
 			name:             "markdown link",
 			markdown:         "[Google](https://www.google.com)",
@@ -172,6 +172,43 @@ func TestNewBlockFromMarkdown(t *testing.T) {
 			expectedType:     TypeLink,
 			expectedTitle:    "Special & Chars!",
 			expectedURL:      "https://example.com/path?query=value&name=test",
+			expectedEnriched: false,
+			expectError:      false,
+		},
+		// Test cases for plain URLs
+		{
+			name:             "plain HTTP URL",
+			markdown:         "http://example.com",
+			expectedType:     TypeLink,
+			expectedTitle:    "http://example.com",
+			expectedURL:      "http://example.com",
+			expectedEnriched: false,
+			expectError:      false,
+		},
+		{
+			name:             "plain HTTPS URL",
+			markdown:         "https://www.google.com",
+			expectedType:     TypeLink,
+			expectedTitle:    "https://www.google.com",
+			expectedURL:      "https://www.google.com",
+			expectedEnriched: false,
+			expectError:      false,
+		},
+		{
+			name:             "plain URL with path and query parameters",
+			markdown:         "https://example.com/path/to/resource?param1=value1&param2=value2",
+			expectedType:     TypeLink,
+			expectedTitle:    "https://example.com/path/to/resource?param1=value1&param2=value2",
+			expectedURL:      "https://example.com/path/to/resource?param1=value1&param2=value2",
+			expectedEnriched: false,
+			expectError:      false,
+		},
+		{
+			name:             "plain FTP URL",
+			markdown:         "ftp://ftp.example.com/files",
+			expectedType:     TypeLink,
+			expectedTitle:    "ftp://ftp.example.com/files",
+			expectedURL:      "ftp://ftp.example.com/files",
 			expectedEnriched: false,
 			expectError:      false,
 		},
@@ -246,6 +283,27 @@ func TestNewBlockFromMarkdownEdgeCases(t *testing.T) {
 	block, err = NewBlockFromMarkdown(linkWithinText)
 	assert.NoError(t, err)
 	assert.Equal(t, TypeParagraph, block.Type) // Should be paragraph since the link is not standalone
+
+	// Test edge cases for plain URLs
+	notAURL := "not a url"
+	block, err = NewBlockFromMarkdown(notAURL)
+	assert.NoError(t, err)
+	assert.Equal(t, TypeParagraph, block.Type)
+
+	incompleteURL := "http://"
+	block, err = NewBlockFromMarkdown(incompleteURL)
+	assert.NoError(t, err)
+	assert.Equal(t, TypeParagraph, block.Type)
+
+	urlWithoutProtocol := "www.example.com"
+	block, err = NewBlockFromMarkdown(urlWithoutProtocol)
+	assert.NoError(t, err)
+	assert.Equal(t, TypeParagraph, block.Type) // URLs must have protocol to be recognized
+
+	urlWithText := "Visit https://example.com today!"
+	block, err = NewBlockFromMarkdown(urlWithText)
+	assert.NoError(t, err)
+	assert.Equal(t, TypeParagraph, block.Type) // Should be paragraph since URL is part of text
 }
 
 // Test the helper function matchNumberedList
