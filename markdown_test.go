@@ -14,6 +14,10 @@ func TestNewBlockFromMarkdown(t *testing.T) {
 		expectedTitle  string
 		expectError    bool
 		errorSubstring string
+		// Additional expected properties for links
+		expectedURL         string
+		expectedDescription string
+		expectedEnriched    bool
 	}{
 		{
 			name:          "empty string creates paragraph",
@@ -134,6 +138,43 @@ func TestNewBlockFromMarkdown(t *testing.T) {
 			expectedTitle: "1.Not a numbered list",
 			expectError:   false,
 		},
+		// New test cases for links
+		{
+			name:             "markdown link",
+			markdown:         "[Google](https://www.google.com)",
+			expectedType:     TypeLink,
+			expectedTitle:    "Google",
+			expectedURL:      "https://www.google.com",
+			expectedEnriched: false,
+			expectError:      false,
+		},
+		{
+			name:             "markdown link with empty text",
+			markdown:         "[](https://www.example.com)",
+			expectedType:     TypeLink,
+			expectedTitle:    "",
+			expectedURL:      "https://www.example.com",
+			expectedEnriched: false,
+			expectError:      false,
+		},
+		{
+			name:             "markdown link with empty URL",
+			markdown:         "[Empty URL]()",
+			expectedType:     TypeLink,
+			expectedTitle:    "Empty URL",
+			expectedURL:      "",
+			expectedEnriched: false,
+			expectError:      false,
+		},
+		{
+			name:             "markdown link with special characters",
+			markdown:         "[Special & Chars!](https://example.com/path?query=value&name=test)",
+			expectedType:     TypeLink,
+			expectedTitle:    "Special & Chars!",
+			expectedURL:      "https://example.com/path?query=value&name=test",
+			expectedEnriched: false,
+			expectError:      false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -151,13 +192,26 @@ func TestNewBlockFromMarkdown(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedType, block.Type)
 
-			// Check title property based on block type
-			var title string
-			var ok bool
+			// Check properties based on block type
+			if tt.expectedType == TypeLink {
+				// Check link properties
+				title, titleExists := block.Properties.GetString(PropertyKeyTitle)
+				assert.True(t, titleExists, "Title property should exist for link")
+				assert.Equal(t, tt.expectedTitle, title)
 
-			title, ok = block.Properties.GetString(PropertyKeyTitle)
-			assert.True(t, ok, "Title property should exist")
-			assert.Equal(t, tt.expectedTitle, title)
+				url, urlExists := block.Properties.GetString(PropertyKeyURL)
+				assert.True(t, urlExists, "URL property should exist for link")
+				assert.Equal(t, tt.expectedURL, url)
+
+				enriched, enrichedExists := block.Properties.GetBool(PropertyKeyEnriched)
+				assert.True(t, enrichedExists, "Enriched property should exist for link")
+				assert.Equal(t, tt.expectedEnriched, enriched)
+			} else {
+				// Check title property for non-link blocks
+				title, ok := block.Properties.GetString(PropertyKeyTitle)
+				assert.True(t, ok, "Title property should exist")
+				assert.Equal(t, tt.expectedTitle, title)
+			}
 		})
 	}
 }
@@ -181,6 +235,17 @@ func TestNewBlockFromMarkdownEdgeCases(t *testing.T) {
 	block, err = NewBlockFromMarkdown(multiline)
 	assert.NoError(t, err)
 	assert.Equal(t, TypeParagraph, block.Type)
+
+	// Test link edge cases
+	incompleteLink := "[Some text](https://example.com"
+	block, err = NewBlockFromMarkdown(incompleteLink)
+	assert.NoError(t, err)
+	assert.Equal(t, TypeParagraph, block.Type) // Should be treated as paragraph if not a valid link syntax
+
+	linkWithinText := "This contains a [link](https://example.com) in text"
+	block, err = NewBlockFromMarkdown(linkWithinText)
+	assert.NoError(t, err)
+	assert.Equal(t, TypeParagraph, block.Type) // Should be paragraph since the link is not standalone
 }
 
 // Test the helper function matchNumberedList
