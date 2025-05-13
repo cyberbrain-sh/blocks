@@ -10,6 +10,21 @@ import (
 )
 
 func RenderContent(ctx context.Context, b Block, lookupBlocks map[uuid.UUID]Block) (string, error) {
+	// Create a new context with visited blocks map if it doesn't exist
+	return renderContentWithCycleDetection(ctx, b, lookupBlocks, make(map[uuid.UUID]bool))
+}
+
+// renderContentWithCycleDetection is an internal function that tracks visited blocks to prevent infinite recursion
+func renderContentWithCycleDetection(ctx context.Context, b Block, lookupBlocks map[uuid.UUID]Block, visitedBlocks map[uuid.UUID]bool) (string, error) {
+	// Check if we've already processed this block to prevent cycles
+	if visitedBlocks[b.ID] {
+		// We detected a cycle, return empty string to break the recursion
+		return "", nil
+	}
+
+	// Mark this block as visited
+	visitedBlocks[b.ID] = true
+
 	// Always render the current block's properties
 	ownContent := RenderProperties(ctx, b)
 
@@ -34,8 +49,8 @@ func RenderContent(ctx context.Context, b Block, lookupBlocks map[uuid.UUID]Bloc
 			continue
 		}
 
-		// Recursively render the child block
-		childContent, err := RenderContent(ctx, childBlock, lookupBlocks)
+		// Recursively render the child block with cycle detection
+		childContent, err := renderContentWithCycleDetection(ctx, childBlock, lookupBlocks, visitedBlocks)
 		if err != nil {
 			return "", err
 		}
@@ -63,42 +78,46 @@ type RenderingForJSONStructure struct {
 }
 
 func RenderAsJSON(ctx context.Context, b Block, lookupBlocks map[uuid.UUID]Block) RenderingForJSONStructure {
+	// Apply the same cycle detection to RenderAsJSON
+	return renderAsJSONWithCycleDetection(b, lookupBlocks, make(map[uuid.UUID]bool))
+}
 
-	// Recursive function to convert a block to RenderingForJSONStructure
-	var buildRenderingStructure func(block Block) RenderingForJSONStructure
-	buildRenderingStructure = func(block Block) RenderingForJSONStructure {
-		// Create the base structure for this block
-		propJson, _ := json.Marshal(block.Properties)
+// renderAsJSONWithCycleDetection is an internal function that prevents infinite recursion in RenderAsJSON
+func renderAsJSONWithCycleDetection(block Block, lookupBlocks map[uuid.UUID]Block, visitedBlocks map[uuid.UUID]bool) RenderingForJSONStructure {
+	// Create the base structure for this block
+	propJson, _ := json.Marshal(block.Properties)
 
-		result := RenderingForJSONStructure{
-			AnnotationID: block.AnnotationID(),
-			ID:           block.ID.String(),
-			Properties:   propJson,
-			ContentType:  block.Type.ContentType().String(),
-			Keywords:     block.Keywords(),
-			CreatedAt:    block.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:    block.UpdatedAt.Format(time.RFC3339),
-		}
-
-		// Process child blocks
-		for _, childID := range block.Content {
-			// Find the child block in the lookup using direct map access
-			childBlock, exists := lookupBlocks[childID]
-			if !exists {
-				// Skip if child block not found
-				continue
-			}
-
-			// Recursively process the child block
-			childStructure := buildRenderingStructure(childBlock)
-			result.ChildBlocks = append(result.ChildBlocks, childStructure)
-		}
-
-		return result
+	result := RenderingForJSONStructure{
+		AnnotationID: block.AnnotationID(),
+		ID:           block.ID.String(),
+		Properties:   propJson,
+		ContentType:  block.Type.ContentType().String(),
+		Keywords:     block.Keywords(),
+		CreatedAt:    block.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:    block.UpdatedAt.Format(time.RFC3339),
 	}
 
-	// Build the complete structure starting from the root block
-	rootStructure := buildRenderingStructure(b)
+	// Process child blocks
+	for _, childID := range block.Content {
+		// Skip if we've already processed this block (cycle detection)
+		if visitedBlocks[childID] {
+			continue
+		}
 
-	return rootStructure
+		// Mark this block as visited
+		visitedBlocks[childID] = true
+
+		// Find the child block in the lookup using direct map access
+		childBlock, exists := lookupBlocks[childID]
+		if !exists {
+			// Skip if child block not found
+			continue
+		}
+
+		// Recursively process the child block with cycle detection
+		childStructure := renderAsJSONWithCycleDetection(childBlock, lookupBlocks, visitedBlocks)
+		result.ChildBlocks = append(result.ChildBlocks, childStructure)
+	}
+
+	return result
 }

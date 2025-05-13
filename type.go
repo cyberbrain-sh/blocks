@@ -79,7 +79,7 @@ const BlockContentTypeStructural BlockContentType = "structural"
 
 func (d DataType) ContentType() BlockContentType {
 	switch d {
-	case TypeParagraph, TypeHeader1, TypeHeader2, TypeHeader3, TypeHeader4, TypeHeader5, TypeHeader6, TypeBulletListItem, TypeNumberedListItem:
+	case TypePage, TypeParagraph, TypeHeader1, TypeHeader2, TypeHeader3, TypeHeader4, TypeHeader5, TypeHeader6, TypeBulletListItem, TypeNumberedListItem:
 		return BlockContentTypeTextual
 	}
 	return BlockContentTypeStructural
