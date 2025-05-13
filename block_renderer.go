@@ -74,7 +74,7 @@ func RenderAsJSON(ctx context.Context, b Block, lookupBlocks map[uuid.UUID]Block
 			AnnotationID: block.AnnotationID(),
 			ID:           block.ID.String(),
 			Properties:   propJson,
-			ContentType:  block.Type.ContentType(),
+			ContentType:  block.Type.ContentType().String(),
 			Keywords:     block.Keywords(),
 			CreatedAt:    block.CreatedAt.Format(time.RFC3339),
 			UpdatedAt:    block.UpdatedAt.Format(time.RFC3339),

@@ -68,10 +68,19 @@ func (d DataType) IsValid() bool {
 	return false
 }
 
-func (d DataType) ContentType() string {
+type BlockContentType string
+
+func (b BlockContentType) String() string {
+	return string(b)
+}
+
+const BlockContentTypeTextual BlockContentType = "textual"
+const BlockContentTypeStructural BlockContentType = "structural"
+
+func (d DataType) ContentType() BlockContentType {
 	switch d {
-	case TypeMovie, TypeSeries, TypeLink, TypeToDo, TypeEmail, TypeYouTube, TypeInstagram, TypeTweet:
-		return "structural"
+	case TypeParagraph, TypeHeader1, TypeHeader2, TypeHeader3, TypeHeader4, TypeHeader5, TypeHeader6, TypeBulletListItem, TypeNumberedListItem:
+		return BlockContentTypeTextual
 	}
-	return "textual"
+	return BlockContentTypeStructural
 }
