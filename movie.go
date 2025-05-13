@@ -100,6 +100,11 @@ func AddMovieProperties(b *Block, title, description, imageURL, url, imdbID, tmd
 		return fmt.Errorf("cannot add movie properties because given b is nil")
 	}
 
+	if checked == nil {
+		pFalse := false
+		checked = &pFalse
+	}
+
 	// Common properties
 	if title != nil {
 		if err := b.Properties.ReplaceValue(PropertyKeyTitle, *title); err != nil {

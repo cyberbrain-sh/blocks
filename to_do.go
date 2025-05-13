@@ -16,10 +16,13 @@ func AddToDoProperties(b *Block, title *string, done *bool, date *time.Time, off
 		}
 	}
 
-	if done != nil {
-		if err := b.Properties.ReplaceValue(PropertyKeyChecked, *done); err != nil {
-			return fmt.Errorf("failed to set checked property: %w", err)
-		}
+	if done == nil {
+		pFalse := false
+		done = &pFalse
+	}
+
+	if err := b.Properties.ReplaceValue(PropertyKeyChecked, *done); err != nil {
+		return fmt.Errorf("failed to set checked property: %w", err)
 	}
 
 	if date != nil {
