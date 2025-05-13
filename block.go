@@ -325,6 +325,8 @@ func RenderProperties(ctx context.Context, b Block) string {
 		return RenderYoutubeProperties(b)
 	case TypeMovie:
 		return RenderMovieProperties(b)
+	case TypeSeries:
+		return RenderSeriesProperties(b)
 	case TypeEmail:
 		return RenderEmailProperties(b)
 	case TypeInstagram:
