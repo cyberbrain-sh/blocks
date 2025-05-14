@@ -331,6 +331,14 @@ func RenderProperties(ctx context.Context, b Block) string {
 		return RenderEmailProperties(b)
 	case TypeInstagram:
 		return RenderInstagramProperties(b)
+	case TypeBook:
+		return RenderBookProperties(b)
+	case TypeLine:
+		return RenderLineProperties(b)
+	case TypePerson:
+		return RenderPersonProperties(b)
+	case TypePlace:
+		return RenderPlaceProperties(b)
 	case TypeHeader1, TypeHeader2, TypeHeader3, TypeHeader4, TypeHeader5, TypeHeader6:
 		return RenderHeaderProperties(b)
 	case TypeNumberedListItem:

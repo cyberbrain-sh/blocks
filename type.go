@@ -24,6 +24,10 @@ const (
 	TypeYouTube   DataType = "youtube"
 	TypeTweet     DataType = "tweet"
 	TypeSeries    DataType = "series"
+	TypeBook      DataType = "book"
+	TypeLine      DataType = "line"
+	TypePerson    DataType = "person"
+	TypePlace     DataType = "place"
 	// add all text blocks as well once we are ready
 	TypeParagraph        DataType = "paragraph"
 	TypeHeader1          DataType = "heading_1"
@@ -54,6 +58,10 @@ func (d DataType) IsValid() bool {
 		TypeYouTube,
 		TypeTweet,
 		TypeSeries,
+		TypeBook,
+		TypeLine,
+		TypePerson,
+		TypePlace,
 		TypeParagraph,
 		TypeHeader1,
 		TypeHeader2,
@@ -79,7 +87,7 @@ const BlockContentTypeStructural BlockContentType = "structural"
 
 func (d DataType) ContentType() BlockContentType {
 	switch d {
-	case TypePage, TypeParagraph, TypeHeader1, TypeHeader2, TypeHeader3, TypeHeader4, TypeHeader5, TypeHeader6, TypeBulletListItem, TypeNumberedListItem:
+	case TypePage, TypeParagraph, TypeHeader1, TypeHeader2, TypeHeader3, TypeHeader4, TypeHeader5, TypeHeader6, TypeBulletListItem, TypeNumberedListItem, TypeLine:
 		return BlockContentTypeTextual
 	}
 	return BlockContentTypeStructural

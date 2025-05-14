@@ -1,8 +1,17 @@
 package blocks
 
 import (
+	"encoding/json"
 	"fmt"
 )
+
+// LinkData represents the structure of link data in JSON format
+type LinkData struct {
+	URL         string `json:"url"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	ImageURL    string `json:"image_url,omitempty"`
+}
 
 func AddLinkPropertiesFromPage(block *Block, page PageData) error {
 	if block == nil {
@@ -17,6 +26,45 @@ func AddLinkPropertiesFromPage(block *Block, page PageData) error {
 
 	// Call AddLinkProperties with the extracted values
 	return AddLinkProperties(block, &originalURL, &title, &description, &imageURL, true)
+}
+
+// AddLinkPropertiesFromJSON parses a json.RawMessage into a LinkData struct
+// and adds the link properties to the given block
+func AddLinkPropertiesFromJSON(block *Block, rawJSON json.RawMessage) error {
+	if block == nil {
+		return fmt.Errorf("cannot add link properties because given block is nil")
+	}
+
+	// Parse the JSON data into a LinkData struct
+	var linkData LinkData
+	if err := json.Unmarshal(rawJSON, &linkData); err != nil {
+		return fmt.Errorf("failed to unmarshal link data: %w", err)
+	}
+
+	// Validate required fields
+	if linkData.URL == "" {
+		return fmt.Errorf("link data must include a URL")
+	}
+
+	// Convert struct fields to pointers for AddLinkProperties
+	url := linkData.URL
+
+	var title, description, imageURL *string
+
+	if linkData.Title != "" {
+		title = &linkData.Title
+	}
+
+	if linkData.Description != "" {
+		description = &linkData.Description
+	}
+
+	if linkData.ImageURL != "" {
+		imageURL = &linkData.ImageURL
+	}
+
+	// Call AddLinkProperties with the extracted data
+	return AddLinkProperties(block, &url, title, description, imageURL, true)
 }
 
 func AddLinkProperties(b *Block, url, title, description, urlImage *string, enriched bool) error {

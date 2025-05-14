@@ -335,6 +335,15 @@ Each entity type has dedicated functions for:
 
 This type-specific approach enables the blocks system to accurately model diverse real-world entities while maintaining a consistent interface for working with all block types.
 
+## Todo List for New Blocks
+
+The following block types are planned for future implementation:
+
+- [ ] **Line Separator**: A simple visual separator without properties for dividing content sections
+- [ ] **Book**: Entity block for representing books with properties like title, author, ISBN, publication date, etc.
+- [ ] **Person**: Entity block for representing people (friend, spouse, family member, colleague, etc.) with properties like name, relationship type, contact information, etc.
+- [ ] **Place**: Entity block for representing locations (restaurant, home, office, etc.) with properties like name, address, coordinates, type, etc.
+
 ## License
 
 [License Information]

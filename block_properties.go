@@ -43,7 +43,8 @@ const (
 	TypeBool
 	TypeDateTime
 	TypeStringArray
-	TypeAny // For backward compatibility
+	TypeFloatArray // For coordinates array [latitude, longitude]
+	TypeAny        // For backward compatibility
 )
 
 // Common properties
@@ -124,6 +125,30 @@ const PropertyKeyReceivedAt string = "received_at"
 const PropertyKeyAttachments string = "attachments"
 const PropertyKeyLabels string = "labels"
 
+// Book properties
+const PropertyKeyISBN string = "isbn"
+const PropertyKeyPublisher string = "publisher"
+const PropertyKeyPageCount string = "page_count"
+const PropertyKeyPrice string = "price"
+const PropertyKeyAuthorBio string = "author_bio"
+const PropertyKeyTableOfContents string = "table_of_contents"
+const PropertyKeyReviews string = "reviews"
+
+// Person properties
+const PropertyKeyFirstName string = "first_name"
+const PropertyKeyLastName string = "last_name"
+const PropertyKeyBirthday string = "birthday"
+const PropertyKeyRelationType string = "relation_type"
+const PropertyKeyAddress string = "address"
+const PropertyKeyPhoneNumber string = "phone_number"
+
+// Place properties
+const PropertyKeyPlaceType string = "place_type"
+const PropertyKeyCoordinates string = "coordinates"
+const PropertyKeyMapURL string = "map_url"
+const PropertyKeyVisitedDate string = "visited_date"
+const PropertyKeyPlaceReviews string = "place_reviews"
+
 // propertyTypes maps property keys to their expected types
 var propertyTypes = map[string]PropertyType{
 	// Common properties
@@ -203,6 +228,30 @@ var propertyTypes = map[string]PropertyType{
 	PropertyKeyReceivedAt:  TypeDateTime,
 	PropertyKeyAttachments: TypeStringArray,
 	PropertyKeyLabels:      TypeStringArray,
+
+	// Book properties
+	PropertyKeyISBN:            TypeString,
+	PropertyKeyPublisher:       TypeString,
+	PropertyKeyPageCount:       TypeInt,
+	PropertyKeyPrice:           TypeFloat,
+	PropertyKeyAuthorBio:       TypeString,
+	PropertyKeyTableOfContents: TypeString,
+	PropertyKeyReviews:         TypeStringArray,
+
+	// Person properties
+	PropertyKeyFirstName:    TypeString,
+	PropertyKeyLastName:     TypeString,
+	PropertyKeyBirthday:     TypeDateTime,
+	PropertyKeyRelationType: TypeString,
+	PropertyKeyAddress:      TypeString,
+	PropertyKeyPhoneNumber:  TypeString,
+
+	// Place properties
+	PropertyKeyPlaceType:    TypeString,
+	PropertyKeyCoordinates:  TypeFloatArray,
+	PropertyKeyMapURL:       TypeString,
+	PropertyKeyVisitedDate:  TypeDateTime,
+	PropertyKeyPlaceReviews: TypeStringArray,
 }
 
 // getPropertyType returns the expected type for a property key
@@ -463,6 +512,11 @@ func convertValue(key string, value interface{}) (interface{}, error) {
 		}
 
 	case TypeStringArray:
+		// If it's already an array, let it pass through
+		// For single values, we'll handle them in the AppendValue/ReplaceValue methods
+		return value, nil
+
+	case TypeFloatArray:
 		// If it's already an array, let it pass through
 		// For single values, we'll handle them in the AppendValue/ReplaceValue methods
 		return value, nil
