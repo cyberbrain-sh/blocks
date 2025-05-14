@@ -24,7 +24,13 @@ func AddLinkPropertiesFromPage(block *Block, page PageData) error {
 	imageURL := page.GetImage()
 	originalURL := page.GetURL()
 
+	// Validate required URL field
+	if originalURL == "" {
+		return fmt.Errorf("page must include a URL")
+	}
+
 	// Call AddLinkProperties with the extracted values
+	// AddLinkProperties will handle empty string checks for other fields
 	return AddLinkProperties(block, &originalURL, &title, &description, &imageURL, true)
 }
 
@@ -72,25 +78,25 @@ func AddLinkProperties(b *Block, url, title, description, urlImage *string, enri
 		return fmt.Errorf("cannot add link properties because given b is nil")
 	}
 
-	if url != nil {
+	if url != nil && *url != "" {
 		if err := b.Properties.ReplaceValue(PropertyKeyURL, *url); err != nil {
 			return fmt.Errorf("failed to set URL property: %w", err)
 		}
 	}
 
-	if title != nil {
+	if title != nil && *title != "" {
 		if err := b.Properties.ReplaceValue(PropertyKeyTitle, *title); err != nil {
 			return fmt.Errorf("failed to set title property: %w", err)
 		}
 	}
 
-	if description != nil {
+	if description != nil && *description != "" {
 		if err := b.Properties.ReplaceValue(PropertyKeyDescription, *description); err != nil {
 			return fmt.Errorf("failed to set description property: %w", err)
 		}
 	}
 
-	if urlImage != nil {
+	if urlImage != nil && *urlImage != "" {
 		if err := b.Properties.ReplaceValue(PropertyKeyImageURL, *urlImage); err != nil {
 			return fmt.Errorf("failed to set image URL property: %w", err)
 		}
