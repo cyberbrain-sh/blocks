@@ -621,3 +621,91 @@ func TestBlock_InsertChild(t *testing.T) {
 		})
 	}
 }
+
+func TestBlock_IsEmpty(t *testing.T) {
+	tests := []struct {
+		name     string
+		block    Block
+		expected bool
+	}{
+		{
+			name: "completely empty block",
+			block: Block{
+				Properties: Properties{},
+				Content:    []uuid.UUID{},
+			},
+			expected: true,
+		},
+		{
+			name: "block with content",
+			block: Block{
+				Properties: Properties{},
+				Content:    []uuid.UUID{uuid.New()},
+			},
+			expected: false,
+		},
+		{
+			name: "block with empty properties",
+			block: Block{
+				Properties: Properties{
+					"title": {""},
+					"text":  {nil},
+				},
+				Content: []uuid.UUID{},
+			},
+			expected: true,
+		},
+		{
+			name: "block with non-empty string property",
+			block: Block{
+				Properties: Properties{
+					"title": {"Hello"},
+					"text":  {""},
+				},
+				Content: []uuid.UUID{},
+			},
+			expected: false,
+		},
+		{
+			name: "block with empty property slices",
+			block: Block{
+				Properties: Properties{
+					"tags": {},
+					"text": {""},
+				},
+				Content: []uuid.UUID{},
+			},
+			expected: true,
+		},
+		{
+			name: "block with mixed empty and non-empty properties",
+			block: Block{
+				Properties: Properties{
+					"title": {"Hello"},
+					"text":  {""},
+					"tags":  {},
+				},
+				Content: []uuid.UUID{},
+			},
+			expected: false,
+		},
+		{
+			name: "block with non-string property",
+			block: Block{
+				Properties: Properties{
+					"count": {42},
+					"text":  {""},
+				},
+				Content: []uuid.UUID{},
+			},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.block.IsEmpty()
+			assert.Equal(t, tt.expected, result, "IsEmpty() returned unexpected result for test case: %s", tt.name)
+		})
+	}
+}

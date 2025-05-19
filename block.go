@@ -45,7 +45,40 @@ type Block struct {
 }
 
 func (b *Block) IsEmpty() bool {
-	return len(b.Properties) == 0 && len(b.Content) == 0
+	// Check if there's any content
+	if len(b.Content) > 0 {
+		return false
+	}
+
+	// Check if there are any properties
+	if len(b.Properties) == 0 {
+		return true
+	}
+
+	// Check if all property values are empty
+	for _, values := range b.Properties {
+		if len(values) == 0 {
+			continue
+		}
+
+		for _, value := range values {
+			if value == nil {
+				continue
+			}
+
+			switch v := value.(type) {
+			case string:
+				if v != "" {
+					return false
+				}
+			default:
+				// For any other type, consider it non-empty
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 func (b *Block) LockKeyForEnrichment() string {

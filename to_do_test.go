@@ -57,7 +57,7 @@ func TestRenderToDoProperties(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := RenderToDoProperties(block)
-		assert.Equal(t, "- Buy groceries", result)
+		assert.Equal(t, "- [ ] Buy groceries", result)
 	})
 
 	t.Run("title and unchecked", func(t *testing.T) {
@@ -104,7 +104,7 @@ func TestRenderToDoProperties(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := RenderToDoProperties(block)
-		assert.Equal(t, "- Project deadline (Due: 2023-05-15 14:30)", result)
+		assert.Equal(t, "- [ ] Project deadline (Due: 2023-05-15 14:30)", result)
 	})
 
 	t.Run("title and offset", func(t *testing.T) {
@@ -119,7 +119,7 @@ func TestRenderToDoProperties(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := RenderToDoProperties(block)
-		assert.Equal(t, "- Team meeting (Reminder: 30m0s before)", result)
+		assert.Equal(t, "- [ ] Team meeting (Reminder: 30m0s before)", result)
 	})
 
 	t.Run("title, checked, and date", func(t *testing.T) {
