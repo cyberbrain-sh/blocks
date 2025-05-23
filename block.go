@@ -42,6 +42,9 @@ type Block struct {
 
 	// generated content for embeddings
 	CalculatedContent string
+
+	// For search purposes
+	DenseVector []float32 `json:"dense_vector"`
 }
 
 func (b *Block) IsEmpty() bool {
