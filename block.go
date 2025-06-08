@@ -40,6 +40,10 @@ type Block struct {
 	CreatedAt         time.Time       `json:"created_at"`
 	UpdatedAt         time.Time       `json:"updated_at"`
 
+	// Meaning contains a short explanation of what this block is about.
+	// This field should be set only for root blocks (blocks without parents).
+	Meaning string `json:"meaning,omitempty"`
+
 	// generated content for embeddings
 	CalculatedContent string
 
