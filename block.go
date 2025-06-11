@@ -44,6 +44,9 @@ type Block struct {
 	// This field should be set only for root blocks (blocks without parents).
 	Meaning string `json:"meaning,omitempty"`
 
+	// Classification contains the classification data for the block
+	Classification Classification `json:"classification,omitempty"`
+
 	// generated content for embeddings
 	CalculatedContent string
 
