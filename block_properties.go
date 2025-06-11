@@ -22,6 +22,7 @@ const (
 	BlockPropertyStypes            = "styles"
 	BlockPropertyContent           = "content"
 	BlockPropertyMeaning           = "meaning"
+	BlockPropertyClassification    = "classification"
 	BlockPropertyChildrenRecursive = "children_recursive"
 	BlockPropertyRawBody           = "raw_body"
 	BlockPropertyLifecycleStatus   = "lifecycle_status"
