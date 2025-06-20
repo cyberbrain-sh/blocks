@@ -66,15 +66,21 @@ func renderContentWithCycleDetection(ctx context.Context, b Block, lookupBlocks 
 }
 
 type RenderingForJSONStructure struct {
-	AnnotationID string                      `json:"annotation_id"`
-	ID           string                      `json:"id"`
-	Properties   json.RawMessage             `json:"properties"`
-	ContentType  string                      `json:"content_type"`
-	ChildBlocks  []RenderingForJSONStructure `json:"child_blocks"`
-	Keywords     []string                    `json:"keywords"`
-	CreatedAt    string                      `json:"created_at"`
-	UpdatedAt    string                      `json:"updated_at"`
-	Score        float64                     `json:"-"` // Avoid this to reduce confusion in reranker
+	AnnotationID string                       `json:"annotation_id"`
+	ID           string                       `json:"id"`
+	Properties   json.RawMessage              `json:"properties"`
+	ContentType  string                       `json:"content_type"`
+	ChildBlocks  []RenderingForJSONStructure  `json:"child_blocks"`
+	Keywords     []string                     `json:"keywords"`
+	CreatedAt    string                       `json:"created_at"`
+	UpdatedAt    string                       `json:"updated_at"`
+	Space        *RenderingSpaceJSONStructure `json:"space"`
+	Score        float64                      `json:"-"` // Avoid this to reduce confusion in reranker
+}
+
+type RenderingSpaceJSONStructure struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 func RenderAsJSON(ctx context.Context, b Block, lookupBlocks map[uuid.UUID]Block) RenderingForJSONStructure {
