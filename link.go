@@ -78,28 +78,24 @@ func AddLinkProperties(b *Block, url, title, description, urlImage *string, enri
 		return fmt.Errorf("cannot add link properties because given b is nil")
 	}
 
-	// Always set URL property if provided (even if empty)
-	if url != nil {
+	if url != nil && *url != "" {
 		if err := b.Properties.ReplaceValue(PropertyKeyURL, *url); err != nil {
 			return fmt.Errorf("failed to set URL property: %w", err)
 		}
 	}
 
-	// Always set title property if provided (even if empty)
-	if title != nil {
+	if title != nil && *title != "" {
 		if err := b.Properties.ReplaceValue(PropertyKeyTitle, *title); err != nil {
 			return fmt.Errorf("failed to set title property: %w", err)
 		}
 	}
 
-	// Only set description if not empty
 	if description != nil && *description != "" {
 		if err := b.Properties.ReplaceValue(PropertyKeyDescription, *description); err != nil {
 			return fmt.Errorf("failed to set description property: %w", err)
 		}
 	}
 
-	// Only set image URL if not empty
 	if urlImage != nil && *urlImage != "" {
 		if err := b.Properties.ReplaceValue(PropertyKeyImageURL, *urlImage); err != nil {
 			return fmt.Errorf("failed to set image URL property: %w", err)
