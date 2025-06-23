@@ -6,6 +6,39 @@ import (
 	"strings"
 )
 
+// flattenArray recursively flattens nested arrays into a single flat array of strings
+func flattenArray(arr []interface{}) []string {
+	var result []string
+
+	for _, item := range arr {
+		switch v := item.(type) {
+		case string:
+			if v != "" {
+				result = append(result, v)
+			}
+		case []interface{}:
+			// Recursively flatten nested arrays
+			nested := flattenArray(v)
+			result = append(result, nested...)
+		case []string:
+			// Convert []string to []interface{} and flatten
+			interfaceArr := make([]interface{}, len(v))
+			for i, s := range v {
+				interfaceArr[i] = s
+			}
+			nested := flattenArray(interfaceArr)
+			result = append(result, nested...)
+		default:
+			// Convert any other type to string
+			if str := fmt.Sprintf("%v", v); str != "" {
+				result = append(result, str)
+			}
+		}
+	}
+
+	return result
+}
+
 func AddMoviePropertiesFromPage(block *Block, page PageData) error {
 	if block == nil {
 		return fmt.Errorf("cannot add movie properties because given block is nil")
@@ -225,36 +258,36 @@ func AddMovieProperties(b *Block, title, description, imageURL, url, imdbID, tmd
 }
 
 func RenderMovieProperties(b Block) string {
-	// Get basic properties
-	titleValue, hasTitle := b.Properties.Get(PropertyKeyTitle)
-	title, titleOk := titleValue.(string)
-
-	urlValue, hasURL := b.Properties.Get(PropertyKeyURL)
-	url, urlOk := urlValue.(string)
-
-	descValue, hasDesc := b.Properties.Get(PropertyKeyDescription)
-	description, descOk := descValue.(string)
+	// Get basic properties using proper type casting
+	title, hasTitle := b.Properties.GetString(PropertyKeyTitle)
+	url, hasURL := b.Properties.GetString(PropertyKeyURL)
+	description, hasDesc := b.Properties.GetString(PropertyKeyDescription)
 
 	// Get checked property
-	checkedValue, hasChecked := b.Properties.Get(PropertyKeyChecked)
-	checked, _ := checkedValue.(bool)
+	checked, hasChecked := b.Properties.GetBool(PropertyKeyChecked)
 
-	// Get movie-specific properties
-	yearVal, hasYear := b.Properties.Get(PropertyKeyReleaseYear)
+	// Get movie-specific properties with proper type casting
+	releaseYear, hasYear := b.Properties.GetInt(PropertyKeyReleaseYear)
+	rating, hasRating := b.Properties.GetFloat(PropertyKeyRating)
+	runtime, hasRuntime := b.Properties.GetInt(PropertyKeyRuntime)
+	tagline, hasTagline := b.Properties.GetString(PropertyKeyTagline)
 
-	ratingVal, hasRating := b.Properties.Get(PropertyKeyRating)
-	rating, ratingOk := ratingVal.(string)
-
-	runtimeVal, hasRuntime := b.Properties.Get(PropertyKeyRuntime)
-	runtime, runtimeOk := runtimeVal.(string)
-
-	taglineVal, hasTagline := b.Properties.Get(PropertyKeyTagline)
-	tagline, taglineOk := taglineVal.(string)
-
-	// Array properties
+	// Get array properties and flatten them
 	genresArr, hasGenres := b.Properties.GetArray(PropertyKeyGenres)
 	directorsArr, hasDirectors := b.Properties.GetArray(PropertyKeyDirectors)
 	castArr, hasCast := b.Properties.GetArray(PropertyKeyCast)
+
+	// Flatten arrays
+	var genres, directors, cast []string
+	if hasGenres && len(genresArr) > 0 {
+		genres = flattenArray(genresArr)
+	}
+	if hasDirectors && len(directorsArr) > 0 {
+		directors = flattenArray(directorsArr)
+	}
+	if hasCast && len(castArr) > 0 {
+		cast = flattenArray(castArr)
+	}
 
 	// Build the markdown representation
 	var parts []string
@@ -270,28 +303,16 @@ func RenderMovieProperties(b Block) string {
 	}
 
 	// Title with year and link
-	if hasTitle && titleOk && title != "" {
+	if hasTitle && title != "" {
 		titleText := title
 
 		// Add year if available
-		if hasYear {
-			var year string
-			switch y := yearVal.(type) {
-			case int:
-				year = strconv.Itoa(y)
-			case float64:
-				year = strconv.Itoa(int(y))
-			case string:
-				year = y
-			}
-
-			if year != "" {
-				titleText = fmt.Sprintf("%s (%s)", titleText, year)
-			}
+		if hasYear && releaseYear > 0 {
+			titleText = fmt.Sprintf("%s (%d)", titleText, releaseYear)
 		}
 
 		// Add URL if available
-		if hasURL && urlOk && url != "" {
+		if hasURL && url != "" {
 			parts = append(parts, fmt.Sprintf("%s# [%s](%s)", prefix, titleText, url))
 		} else {
 			parts = append(parts, fmt.Sprintf("%s# %s", prefix, titleText))
@@ -299,17 +320,17 @@ func RenderMovieProperties(b Block) string {
 	}
 
 	// Tagline
-	if hasTagline && taglineOk && tagline != "" {
+	if hasTagline && tagline != "" {
 		parts = append(parts, fmt.Sprintf("*%s*", tagline))
 	}
 
 	// Rating and Runtime
 	var stats []string
-	if hasRating && ratingOk && rating != "" {
-		stats = append(stats, fmt.Sprintf("Rating: ⭐ %s", rating))
+	if hasRating && rating > 0 {
+		stats = append(stats, fmt.Sprintf("Rating: ⭐ %.1f", rating))
 	}
-	if hasRuntime && runtimeOk && runtime != "" {
-		stats = append(stats, fmt.Sprintf("Runtime: %s", runtime))
+	if hasRuntime && runtime > 0 {
+		stats = append(stats, fmt.Sprintf("Runtime: %d min", runtime))
 	}
 
 	if len(stats) > 0 {
@@ -317,49 +338,22 @@ func RenderMovieProperties(b Block) string {
 	}
 
 	// Genres
-	if hasGenres && len(genresArr) > 0 {
-		var genreStrs []string
-		for _, g := range genresArr {
-			if gs, ok := g.(string); ok && gs != "" {
-				genreStrs = append(genreStrs, gs)
-			}
-		}
-
-		if len(genreStrs) > 0 {
-			parts = append(parts, fmt.Sprintf("**Genres:** %s", strings.Join(genreStrs, ", ")))
-		}
+	if len(genres) > 0 {
+		parts = append(parts, fmt.Sprintf("**Genres:** %s", strings.Join(genres, ", ")))
 	}
 
 	// Directors
-	if hasDirectors && len(directorsArr) > 0 {
-		var directorStrs []string
-		for _, d := range directorsArr {
-			if ds, ok := d.(string); ok && ds != "" {
-				directorStrs = append(directorStrs, ds)
-			}
-		}
-
-		if len(directorStrs) > 0 {
-			parts = append(parts, fmt.Sprintf("**Directors:** %s", strings.Join(directorStrs, ", ")))
-		}
+	if len(directors) > 0 {
+		parts = append(parts, fmt.Sprintf("**Directors:** %s", strings.Join(directors, ", ")))
 	}
 
 	// Cast
-	if hasCast && len(castArr) > 0 {
-		var castStrs []string
-		for _, c := range castArr {
-			if cs, ok := c.(string); ok && cs != "" {
-				castStrs = append(castStrs, cs)
-			}
-		}
-
-		if len(castStrs) > 0 {
-			parts = append(parts, fmt.Sprintf("**Cast:** %s", strings.Join(castStrs, ", ")))
-		}
+	if len(cast) > 0 {
+		parts = append(parts, fmt.Sprintf("**Cast:** %s", strings.Join(cast, ", ")))
 	}
 
 	// Description
-	if hasDesc && descOk && description != "" {
+	if hasDesc && description != "" {
 		parts = append(parts, fmt.Sprintf("\n%s", description))
 	}
 

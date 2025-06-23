@@ -275,38 +275,41 @@ func AddSeriesProperties(b *Block, title, description, imageURL, url, imdbID, tm
 }
 
 func RenderSeriesProperties(b Block) string {
-	// Get basic properties
-	titleValue, hasTitle := b.Properties.Get(PropertyKeyTitle)
-	title, titleOk := titleValue.(string)
-
-	urlValue, hasURL := b.Properties.Get(PropertyKeyURL)
-	url, urlOk := urlValue.(string)
-
-	descValue, hasDesc := b.Properties.Get(PropertyKeyDescription)
-	description, descOk := descValue.(string)
+	// Get basic properties using proper type casting
+	title, hasTitle := b.Properties.GetString(PropertyKeyTitle)
+	url, hasURL := b.Properties.GetString(PropertyKeyURL)
+	description, hasDesc := b.Properties.GetString(PropertyKeyDescription)
 
 	// Get checked property
-	checkedValue, hasChecked := b.Properties.Get(PropertyKeyChecked)
-	checked, _ := checkedValue.(bool)
+	checked, hasChecked := b.Properties.GetBool(PropertyKeyChecked)
 
-	// Get series-specific properties
-	firstYearVal, hasFirstYear := b.Properties.Get(PropertyKeyFirstAirYear)
-	lastYearVal, hasLastYear := b.Properties.Get(PropertyKeyLastAirYear)
+	// Get series-specific properties with proper type casting
+	firstAirYear, hasFirstYear := b.Properties.GetInt(PropertyKeyFirstAirYear)
+	lastAirYear, hasLastYear := b.Properties.GetInt(PropertyKeyLastAirYear)
+	rating, hasRating := b.Properties.GetFloat(PropertyKeyRating)
+	status, hasStatus := b.Properties.GetString(PropertyKeyStatus)
+	seasons, hasSeasons := b.Properties.GetInt(PropertyKeyNumberOfSeasons)
+	episodes, hasEpisodes := b.Properties.GetInt(PropertyKeyNumberOfEpisodes)
 
-	ratingVal, hasRating := b.Properties.Get(PropertyKeyRating)
-	rating, ratingOk := ratingVal.(string)
-
-	statusVal, hasStatus := b.Properties.Get(PropertyKeyStatus)
-	status, statusOk := statusVal.(string)
-
-	seasonsVal, hasSeasons := b.Properties.Get(PropertyKeyNumberOfSeasons)
-	episodesVal, hasEpisodes := b.Properties.Get(PropertyKeyNumberOfEpisodes)
-
-	// Array properties
+	// Get array properties and flatten them
 	genresArr, hasGenres := b.Properties.GetArray(PropertyKeyGenres)
 	creatorsArr, hasCreators := b.Properties.GetArray(PropertyKeyCreators)
 	castArr, hasCast := b.Properties.GetArray(PropertyKeyCast)
 	networksArr, hasNetworks := b.Properties.GetArray(PropertyKeyNetworks)
+
+	var genres, creators, cast, networks []string
+	if hasGenres && len(genresArr) > 0 {
+		genres = flattenArray(genresArr)
+	}
+	if hasCreators && len(creatorsArr) > 0 {
+		creators = flattenArray(creatorsArr)
+	}
+	if hasCast && len(castArr) > 0 {
+		cast = flattenArray(castArr)
+	}
+	if hasNetworks && len(networksArr) > 0 {
+		networks = flattenArray(networksArr)
+	}
 
 	// Build the markdown representation
 	var parts []string
@@ -322,43 +325,16 @@ func RenderSeriesProperties(b Block) string {
 	}
 
 	// Title with year range and link
-	if hasTitle && titleOk && title != "" {
+	if hasTitle && title != "" {
 		titleText := title
-
-		// Add year range if available
-		var firstYear, lastYear string
-		if hasFirstYear {
-			switch y := firstYearVal.(type) {
-			case int:
-				firstYear = strconv.Itoa(y)
-			case float64:
-				firstYear = strconv.Itoa(int(y))
-			case string:
-				firstYear = y
-			}
-		}
-
-		if hasLastYear {
-			switch y := lastYearVal.(type) {
-			case int:
-				lastYear = strconv.Itoa(y)
-			case float64:
-				lastYear = strconv.Itoa(int(y))
-			case string:
-				lastYear = y
-			}
-		}
-
-		if firstYear != "" {
-			if lastYear != "" && lastYear != firstYear {
-				titleText = fmt.Sprintf("%s (%s-%s)", titleText, firstYear, lastYear)
+		if hasFirstYear && firstAirYear > 0 {
+			if hasLastYear && lastAirYear > 0 && lastAirYear != firstAirYear {
+				titleText = fmt.Sprintf("%s (%d-%d)", titleText, firstAirYear, lastAirYear)
 			} else {
-				titleText = fmt.Sprintf("%s (%s)", titleText, firstYear)
+				titleText = fmt.Sprintf("%s (%d)", titleText, firstAirYear)
 			}
 		}
-
-		// Add URL if available
-		if hasURL && urlOk && url != "" {
+		if hasURL && url != "" {
 			parts = append(parts, fmt.Sprintf("%s## [%s](%s)", prefix, titleText, url))
 		} else {
 			parts = append(parts, fmt.Sprintf("%s## %s", prefix, titleText))
@@ -366,125 +342,56 @@ func RenderSeriesProperties(b Block) string {
 	}
 
 	// Status
-	if hasStatus && statusOk && status != "" {
+	if hasStatus && status != "" {
 		parts = append(parts, fmt.Sprintf("**Status:** %s", status))
 	}
 
 	// Rating and Seasons/Episodes
 	var stats []string
-	if hasRating && ratingOk && rating != "" {
-		stats = append(stats, fmt.Sprintf("Rating: ⭐ %s", rating))
+	if hasRating && rating > 0 {
+		stats = append(stats, fmt.Sprintf("Rating: ⭐ %.1f", rating))
 	}
-
 	var seasonsEpisodes string
-	if hasSeasons {
-		var seasons string
-		switch s := seasonsVal.(type) {
-		case int:
-			seasons = strconv.Itoa(s)
-		case float64:
-			seasons = strconv.Itoa(int(s))
-		case string:
-			seasons = s
-		}
-
-		if seasons != "" {
-			seasonsEpisodes = fmt.Sprintf("%s Season", seasons)
-			if seasons != "1" {
-				seasonsEpisodes += "s"
-			}
+	if hasSeasons && seasons > 0 {
+		seasonsEpisodes = fmt.Sprintf("%d Season", seasons)
+		if seasons != 1 {
+			seasonsEpisodes += "s"
 		}
 	}
-
-	if hasEpisodes {
-		var episodes string
-		switch e := episodesVal.(type) {
-		case int:
-			episodes = strconv.Itoa(e)
-		case float64:
-			episodes = strconv.Itoa(int(e))
-		case string:
-			episodes = e
-		}
-
-		if episodes != "" {
-			if seasonsEpisodes != "" {
-				seasonsEpisodes += fmt.Sprintf(", %s Episodes", episodes)
-			} else {
-				seasonsEpisodes = fmt.Sprintf("%s Episodes", episodes)
-			}
+	if hasEpisodes && episodes > 0 {
+		if seasonsEpisodes != "" {
+			seasonsEpisodes += fmt.Sprintf(", %d Episodes", episodes)
+		} else {
+			seasonsEpisodes = fmt.Sprintf("%d Episodes", episodes)
 		}
 	}
-
 	if seasonsEpisodes != "" {
 		stats = append(stats, seasonsEpisodes)
 	}
-
 	if len(stats) > 0 {
 		parts = append(parts, fmt.Sprintf("**%s**", strings.Join(stats, " | ")))
 	}
 
 	// Networks
-	if hasNetworks && len(networksArr) > 0 {
-		var networkStrs []string
-		for _, n := range networksArr {
-			if ns, ok := n.(string); ok && ns != "" {
-				networkStrs = append(networkStrs, ns)
-			}
-		}
-
-		if len(networkStrs) > 0 {
-			parts = append(parts, fmt.Sprintf("**Networks:** %s", strings.Join(networkStrs, ", ")))
-		}
+	if len(networks) > 0 {
+		parts = append(parts, fmt.Sprintf("**Networks:** %s", strings.Join(networks, ", ")))
 	}
-
 	// Genres
-	if hasGenres && len(genresArr) > 0 {
-		var genreStrs []string
-		for _, g := range genresArr {
-			if gs, ok := g.(string); ok && gs != "" {
-				genreStrs = append(genreStrs, gs)
-			}
-		}
-
-		if len(genreStrs) > 0 {
-			parts = append(parts, fmt.Sprintf("**Genres:** %s", strings.Join(genreStrs, ", ")))
-		}
+	if len(genres) > 0 {
+		parts = append(parts, fmt.Sprintf("**Genres:** %s", strings.Join(genres, ", ")))
 	}
-
 	// Creators
-	if hasCreators && len(creatorsArr) > 0 {
-		var creatorStrs []string
-		for _, c := range creatorsArr {
-			if cs, ok := c.(string); ok && cs != "" {
-				creatorStrs = append(creatorStrs, cs)
-			}
-		}
-
-		if len(creatorStrs) > 0 {
-			parts = append(parts, fmt.Sprintf("**Creators:** %s", strings.Join(creatorStrs, ", ")))
-		}
+	if len(creators) > 0 {
+		parts = append(parts, fmt.Sprintf("**Creators:** %s", strings.Join(creators, ", ")))
 	}
-
 	// Cast
-	if hasCast && len(castArr) > 0 {
-		var castStrs []string
-		for _, c := range castArr {
-			if cs, ok := c.(string); ok && cs != "" {
-				castStrs = append(castStrs, cs)
-			}
-		}
-
-		if len(castStrs) > 0 {
-			parts = append(parts, fmt.Sprintf("**Cast:** %s", strings.Join(castStrs, ", ")))
-		}
+	if len(cast) > 0 {
+		parts = append(parts, fmt.Sprintf("**Cast:** %s", strings.Join(cast, ", ")))
 	}
-
 	// Description
-	if hasDesc && descOk && description != "" {
+	if hasDesc && description != "" {
 		parts = append(parts, fmt.Sprintf("\n%s", description))
 	}
-
 	return strings.Join(parts, "\n")
 }
 

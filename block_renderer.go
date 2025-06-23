@@ -74,7 +74,7 @@ type RenderingForJSONStructure struct {
 	Keywords     []string                     `json:"keywords"`
 	CreatedAt    string                       `json:"created_at"`
 	UpdatedAt    string                       `json:"updated_at"`
-	Space        *RenderingSpaceJSONStructure `json:"space"`
+	Space        *RenderingSpaceJSONStructure `json:"space,omitempty"`
 	Score        float64                      `json:"-"` // Avoid this to reduce confusion in reranker
 }
 

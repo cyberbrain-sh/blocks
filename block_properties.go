@@ -340,6 +340,8 @@ func (p Properties) GetInt(key string) (int, bool) {
 			if i, err := strconv.Atoi(v); err == nil {
 				return i, true
 			}
+		case time.Duration:
+			return int(v.Seconds()), true
 		}
 	}
 	return 0, false
@@ -454,6 +456,8 @@ func convertValue(key string, value interface{}) (interface{}, error) {
 				return nil, fmt.Errorf("cannot convert %v to int: %w", v, err)
 			}
 			return i, nil
+		case time.Duration:
+			return int(v.Seconds()), nil
 		default:
 			return nil, fmt.Errorf("cannot convert %T to int", value)
 		}

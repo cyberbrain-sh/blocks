@@ -166,7 +166,7 @@ func TestRenderToDoProperties(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := RenderToDoProperties(block)
-		expected := "- Conference call (Due: 2023-05-15 14:30, Reminder: 30m0s before at 2023-05-15 14:00)"
+		expected := "- [ ] Conference call (Due: 2023-05-15 14:30, Reminder: 30m0s before at 2023-05-15 14:00)"
 		assert.Equal(t, expected, result)
 	})
 
@@ -222,7 +222,7 @@ func TestRenderToDoProperties(t *testing.T) {
 
 		result := RenderToDoProperties(block)
 		// The formatting should preserve the time as specified, though displayed in local format
-		assert.Contains(t, result, "- International call (Due: 2023-05-15 10:30")
+		assert.Contains(t, result, "- [ ] International call (Due: 2023-05-15 10:30")
 		assert.Contains(t, result, "Reminder: 30m0s before at 2023-05-15 10:00")
 	})
 
@@ -239,7 +239,7 @@ func TestRenderToDoProperties(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := RenderToDoProperties(block)
-		expected := "- Annual review (Due: 2023-05-15 14:30, Reminder: 24h0m0s before at 2023-05-14 14:30)"
+		expected := "- [ ] Annual review (Due: 2023-05-15 14:30, Reminder: 24h0m0s before at 2023-05-14 14:30)"
 		assert.Equal(t, expected, result)
 	})
 }

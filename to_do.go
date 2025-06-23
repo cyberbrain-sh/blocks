@@ -16,11 +16,11 @@ func AddToDoProperties(b *Block, title *string, done *bool, date *time.Time, off
 		}
 	}
 
+	// Always set checked property, defaulting to false if done is nil
 	if done == nil {
 		pFalse := false
 		done = &pFalse
 	}
-
 	if err := b.Properties.ReplaceValue(PropertyKeyChecked, *done); err != nil {
 		return fmt.Errorf("failed to set checked property: %w", err)
 	}
@@ -53,9 +53,27 @@ func RenderToDoProperties(b Block) string {
 	dateValue, hasDate := b.Properties.Get(PropertyKeyTargetDateTime)
 	date, dateOk := dateValue.(time.Time)
 
-	// Get reminder offset
+	// Get reminder offset (support int, float64, or time.Duration)
 	offsetValue, hasOffset := b.Properties.Get(PropertyKeyReminderOffset)
-	offset, offsetOk := offsetValue.(time.Duration)
+	var offset time.Duration
+	var offsetOk bool
+	if hasOffset {
+		switch v := offsetValue.(type) {
+		case time.Duration:
+			offset = v
+			offsetOk = true
+		case int:
+			offset = time.Duration(v) * time.Second
+			offsetOk = true
+		case float64:
+			offset = time.Duration(int(v)) * time.Second
+			offsetOk = true
+		case string:
+			// Ignore string parsing for now, as offset should be int, float64, or time.Duration
+			// Could add parsing logic if needed
+			// No-op
+		}
+	}
 
 	// Format as markdown task
 	if hasTitle && titleOk && title != "" {
@@ -78,18 +96,17 @@ func RenderToDoProperties(b Block) string {
 			result += fmt.Sprintf(" (Due: %s", date.Format("2006-01-02 15:04"))
 
 			// Add offset and reminder time if available
-			if hasOffset && offsetOk {
-				// Calculate the reminder time
+			if hasOffset && offsetOk && offset != 0 {
 				reminderTime := date.Add(-offset)
 				result += fmt.Sprintf(", Reminder: %s before at %s",
-					offset,
+					offset.String(),
 					reminderTime.Format("2006-01-02 15:04"))
 			}
 
 			result += ")"
-		} else if hasOffset && offsetOk {
+		} else if hasOffset && offsetOk && offset != 0 {
 			// Only offset without date (can't calculate reminder time)
-			result += fmt.Sprintf(" (Reminder: %s before)", offset)
+			result += fmt.Sprintf(" (Reminder: %s before)", offset.String())
 		}
 
 		return result
