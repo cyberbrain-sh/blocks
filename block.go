@@ -315,6 +315,67 @@ func (b *Block) UpdateFromJSON(data []byte) ([]string, error) {
 	return updatedFields, nil
 }
 
+// Clone returns a copy of the block with a new ID and updated timestamps.
+// The cloned block will have the same content and properties but a fresh identity.
+func (b *Block) Clone() Block {
+	now := time.Now()
+
+	// Create a deep copy of the block
+	clone := *b
+
+	// Generate new ID
+	clone.ID = uuid.New()
+
+	// Update timestamps
+	clone.CreatedAt = now
+	clone.UpdatedAt = now
+
+	return clone
+}
+
+// CreateChild creates a new child block from the current block.
+// The child block will have the current block as its parent and inherit relevant properties.
+// This method does not modify the current block.
+func (b *Block) CreateChild() Block {
+	now := time.Now()
+
+	// Create a new block with basic structure
+	child := Block{
+		ID:                uuid.New(),
+		Type:              TypeFragment, // Default type for child blocks
+		ParentID:          &b.ID,        // Set current block as parent
+		RootParentID:      b.RootParentID,
+		AccountID:         b.AccountID,
+		SpaceID:           b.SpaceID,
+		PreviousSpaceID:   b.PreviousSpaceID,
+		CreatorUserID:     b.CreatorUserID,
+		Properties:        make(Properties),
+		Styles:            make(Properties),
+		Content:           make([]uuid.UUID, 0),
+		ChildrenRecursive: make([]uuid.UUID, 0),
+		RawBody:           "",
+		LifecycleStatus:   b.LifecycleStatus,
+		Metadata:          nil,
+		Origin:            b.Origin,
+		MovesHistory:      make([]Move, 0),
+		LastError:         LastError{},
+		LastViewedAt:      nil,
+		CreatedAt:         now,
+		UpdatedAt:         now,
+		Meaning:           "",
+		Classification:    Classification{},
+		CalculatedContent: "",
+		DenseVector:       nil,
+	}
+
+	// If current block has no root parent, set it as the root
+	if child.RootParentID == nil {
+		child.RootParentID = &b.ID
+	}
+
+	return child
+}
+
 func NewEmptyBlock() Block {
 	return Block{
 		ID:         uuid.New(),
