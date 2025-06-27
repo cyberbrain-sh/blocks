@@ -7,6 +7,8 @@ const (
 	LifecycleStatusCreated              = LifecycleStatus("created")
 	LifecycleStatusEnriching            = LifecycleStatus("enriching")
 	LifecycleStatusEnriched             = LifecycleStatus("enriched")
+	LifecycleStatusTransforming         = LifecycleStatus("transforming")
+	LifecycleStatusTransformed          = LifecycleStatus("transformed")
 	LifecycleStatusRouted               = LifecycleStatus("routed")
 	LifecycleStatusRoutedFinal          = LifecycleStatus("routed_final")
 	LifecycleStatusEditing              = LifecycleStatus("editing")
@@ -39,6 +41,7 @@ func (s LifecycleStatus) Recordable() bool {
 	case LifecycleStatusIngested,
 		LifecycleStatusCreated,
 		LifecycleStatusEnriched,
+		LifecycleStatusTransformed,
 		LifecycleStatusRouted,
 		LifecycleStatusRoutedFinal,
 		LifecycleStatusEdited,
