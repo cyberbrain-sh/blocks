@@ -92,3 +92,12 @@ func (d DataType) ContentType() BlockContentType {
 	}
 	return BlockContentTypeStructural
 }
+
+func (d DataType) IsFinal() bool {
+	switch d {
+	case TypeMovie, TypeSeries, TypeBook, TypePlace, TypePerson:
+		return true
+	default:
+		return false
+	}
+}
