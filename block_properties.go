@@ -155,6 +155,8 @@ const PropertyKeyPlaceReviews string = "place_reviews"
 const PropertyKeySize string = "size"
 const PropertyKeyTranscription string = "transcription"
 const PropertyKeyPublicURL string = "public_url"
+const PropertyKeyFilename string = "filename"
+const PropertyKeyExtension string = "extension"
 
 // propertyTypes maps property keys to their expected types
 var propertyTypes = map[string]PropertyType{
@@ -264,6 +266,8 @@ var propertyTypes = map[string]PropertyType{
 	PropertyKeySize:          TypeInt,
 	PropertyKeyTranscription: TypeString,
 	PropertyKeyPublicURL:     TypeString,
+	PropertyKeyFilename:      TypeString,
+	PropertyKeyExtension:     TypeString,
 }
 
 // getPropertyType returns the expected type for a property key

@@ -6,7 +6,7 @@ import (
 )
 
 // AddAudioProperties adds audio properties to the given block
-func AddAudioProperties(b *Block, size *int, transcription *string, publicURL *string, enriched bool) error {
+func AddAudioProperties(b *Block, size *int, transcription *string, publicURL *string, filename *string, extension *string, enriched bool) error {
 	if b == nil {
 		return fmt.Errorf("cannot add audio properties because given block is nil")
 	}
@@ -32,6 +32,20 @@ func AddAudioProperties(b *Block, size *int, transcription *string, publicURL *s
 		}
 	}
 
+	// Set filename if provided
+	if filename != nil {
+		if err := b.Properties.ReplaceValue(PropertyKeyFilename, *filename); err != nil {
+			return fmt.Errorf("failed to set filename property: %w", err)
+		}
+	}
+
+	// Set extension if provided
+	if extension != nil {
+		if err := b.Properties.ReplaceValue(PropertyKeyExtension, *extension); err != nil {
+			return fmt.Errorf("failed to set extension property: %w", err)
+		}
+	}
+
 	// Set enriched status
 	if err := b.Properties.ReplaceValue(PropertyKeyEnriched, enriched); err != nil {
 		return fmt.Errorf("failed to set enriched property: %w", err)
@@ -46,12 +60,23 @@ func RenderAudioProperties(b Block) string {
 	size, hasSize := b.Properties.GetInt(PropertyKeySize)
 	transcription, hasTranscription := b.Properties.GetString(PropertyKeyTranscription)
 	publicURL, hasPublicURL := b.Properties.GetString(PropertyKeyPublicURL)
+	filename, hasFilename := b.Properties.GetString(PropertyKeyFilename)
+	extension, hasExtension := b.Properties.GetString(PropertyKeyExtension)
 
 	// Build the markdown representation
 	var parts []string
 
 	// Add audio header
 	parts = append(parts, "## Audio")
+
+	// Add filename and extension if available
+	if hasFilename && filename != "" {
+		headerText := filename
+		if hasExtension && extension != "" {
+			headerText = fmt.Sprintf("%s.%s", filename, extension)
+		}
+		parts = append(parts, fmt.Sprintf("**File:** %s", headerText))
+	}
 
 	// Add public URL if available
 	if hasPublicURL && publicURL != "" {
@@ -77,6 +102,8 @@ func GetAudioProperties() []string {
 		PropertyKeySize,
 		PropertyKeyTranscription,
 		PropertyKeyPublicURL,
+		PropertyKeyFilename,
+		PropertyKeyExtension,
 		PropertyKeyEnriched,
 	}
 }
