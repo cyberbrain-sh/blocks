@@ -95,7 +95,7 @@ func (d DataType) ContentType() BlockContentType {
 
 func (d DataType) IsFinal() bool {
 	switch d {
-	case TypeMovie, TypeSeries, TypeBook, TypePlace, TypePerson:
+	case TypeMovie, TypeSeries, TypeBook, TypePlace, TypePerson, TypeImage, TypeVideo, TypeAudio, TypeFile:
 		return true
 	default:
 		return false

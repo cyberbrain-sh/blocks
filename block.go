@@ -443,6 +443,14 @@ func RenderProperties(ctx context.Context, b Block) string {
 		return RenderPersonProperties(b)
 	case TypePlace:
 		return RenderPlaceProperties(b)
+	case TypeImage:
+		return RenderImageProperties(b)
+	case TypeAudio:
+		return RenderAudioProperties(b)
+	case TypeVideo:
+		return RenderVideoProperties(b)
+	case TypeFile:
+		return RenderFileProperties(b)
 	case TypeHeader1, TypeHeader2, TypeHeader3, TypeHeader4, TypeHeader5, TypeHeader6:
 		return RenderHeaderProperties(b)
 	case TypeNumberedListItem:

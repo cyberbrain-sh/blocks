@@ -151,6 +151,11 @@ const PropertyKeyMapURL string = "map_url"
 const PropertyKeyVisitedDate string = "visited_date"
 const PropertyKeyPlaceReviews string = "place_reviews"
 
+// Media properties (for video, audio, image, file)
+const PropertyKeySize string = "size"
+const PropertyKeyTranscription string = "transcription"
+const PropertyKeyPublicURL string = "public_url"
+
 // propertyTypes maps property keys to their expected types
 var propertyTypes = map[string]PropertyType{
 	// Common properties
@@ -254,6 +259,11 @@ var propertyTypes = map[string]PropertyType{
 	PropertyKeyMapURL:       TypeString,
 	PropertyKeyVisitedDate:  TypeDateTime,
 	PropertyKeyPlaceReviews: TypeStringArray,
+
+	// Media properties (for video, audio, image, file)
+	PropertyKeySize:          TypeInt,
+	PropertyKeyTranscription: TypeString,
+	PropertyKeyPublicURL:     TypeString,
 }
 
 // getPropertyType returns the expected type for a property key
