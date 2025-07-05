@@ -157,6 +157,7 @@ const PropertyKeyTranscription string = "transcription"
 const PropertyKeyPublicURL string = "public_url"
 const PropertyKeyFilename string = "filename"
 const PropertyKeyExtension string = "extension"
+const PropertyKeyTranscribed string = "transcribed"
 
 // propertyTypes maps property keys to their expected types
 var propertyTypes = map[string]PropertyType{
@@ -268,6 +269,7 @@ var propertyTypes = map[string]PropertyType{
 	PropertyKeyPublicURL:     TypeString,
 	PropertyKeyFilename:      TypeString,
 	PropertyKeyExtension:     TypeString,
+	PropertyKeyTranscribed:   TypeBool,
 }
 
 // getPropertyType returns the expected type for a property key

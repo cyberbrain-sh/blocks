@@ -6,7 +6,7 @@ import (
 )
 
 // AddAudioProperties adds audio properties to the given block
-func AddAudioProperties(b *Block, size *int, transcription *string, publicURL *string, filename *string, extension *string, enriched bool) error {
+func AddAudioProperties(b *Block, size *int, transcription *string, publicURL *string, filename *string, extension *string, duration *string, transcribed *bool, enriched bool) error {
 	if b == nil {
 		return fmt.Errorf("cannot add audio properties because given block is nil")
 	}
@@ -46,6 +46,20 @@ func AddAudioProperties(b *Block, size *int, transcription *string, publicURL *s
 		}
 	}
 
+	// Set duration if provided
+	if duration != nil {
+		if err := b.Properties.ReplaceValue(PropertyKeyDuration, *duration); err != nil {
+			return fmt.Errorf("failed to set duration property: %w", err)
+		}
+	}
+
+	// Set transcribed status if provided
+	if transcribed != nil {
+		if err := b.Properties.ReplaceValue(PropertyKeyTranscribed, *transcribed); err != nil {
+			return fmt.Errorf("failed to set transcribed property: %w", err)
+		}
+	}
+
 	// Set enriched status
 	if err := b.Properties.ReplaceValue(PropertyKeyEnriched, enriched); err != nil {
 		return fmt.Errorf("failed to set enriched property: %w", err)
@@ -62,6 +76,8 @@ func RenderAudioProperties(b Block) string {
 	publicURL, hasPublicURL := b.Properties.GetString(PropertyKeyPublicURL)
 	filename, hasFilename := b.Properties.GetString(PropertyKeyFilename)
 	extension, hasExtension := b.Properties.GetString(PropertyKeyExtension)
+	duration, hasDuration := b.Properties.GetString(PropertyKeyDuration)
+	transcribed, hasTranscribed := b.Properties.GetBool(PropertyKeyTranscribed)
 
 	// Build the markdown representation
 	var parts []string
@@ -88,9 +104,23 @@ func RenderAudioProperties(b Block) string {
 		parts = append(parts, fmt.Sprintf("**Size:** %d bytes", size))
 	}
 
+	// Add duration if available
+	if hasDuration && duration != "" {
+		parts = append(parts, fmt.Sprintf("**Duration:** %s", duration))
+	}
+
 	// Add transcription if available
 	if hasTranscription && transcription != "" {
 		parts = append(parts, fmt.Sprintf("**Transcription:** %s", transcription))
+	}
+
+	// Add transcribed status if available
+	if hasTranscribed {
+		status := "No"
+		if transcribed {
+			status = "Yes"
+		}
+		parts = append(parts, fmt.Sprintf("**Transcribed:** %s", status))
 	}
 
 	return strings.Join(parts, "\n")
@@ -104,6 +134,8 @@ func GetAudioProperties() []string {
 		PropertyKeyPublicURL,
 		PropertyKeyFilename,
 		PropertyKeyExtension,
+		PropertyKeyDuration,
+		PropertyKeyTranscribed,
 		PropertyKeyEnriched,
 	}
 }

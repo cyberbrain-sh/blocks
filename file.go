@@ -6,7 +6,7 @@ import (
 )
 
 // AddFileProperties adds file properties to the given block
-func AddFileProperties(b *Block, size *int, transcription *string, publicURL *string, filename *string, extension *string, enriched bool) error {
+func AddFileProperties(b *Block, size *int, transcription *string, publicURL *string, filename *string, extension *string, transcribed *bool, enriched bool) error {
 	if b == nil {
 		return fmt.Errorf("cannot add file properties because given block is nil")
 	}
@@ -46,6 +46,13 @@ func AddFileProperties(b *Block, size *int, transcription *string, publicURL *st
 		}
 	}
 
+	// Set transcribed status if provided
+	if transcribed != nil {
+		if err := b.Properties.ReplaceValue(PropertyKeyTranscribed, *transcribed); err != nil {
+			return fmt.Errorf("failed to set transcribed property: %w", err)
+		}
+	}
+
 	// Set enriched status
 	if err := b.Properties.ReplaceValue(PropertyKeyEnriched, enriched); err != nil {
 		return fmt.Errorf("failed to set enriched property: %w", err)
@@ -62,6 +69,7 @@ func RenderFileProperties(b Block) string {
 	publicURL, hasPublicURL := b.Properties.GetString(PropertyKeyPublicURL)
 	filename, hasFilename := b.Properties.GetString(PropertyKeyFilename)
 	extension, hasExtension := b.Properties.GetString(PropertyKeyExtension)
+	transcribed, hasTranscribed := b.Properties.GetBool(PropertyKeyTranscribed)
 
 	// Build the markdown representation
 	var parts []string
@@ -93,6 +101,15 @@ func RenderFileProperties(b Block) string {
 		parts = append(parts, fmt.Sprintf("**Transcription:** %s", transcription))
 	}
 
+	// Add transcribed status if available
+	if hasTranscribed {
+		status := "No"
+		if transcribed {
+			status = "Yes"
+		}
+		parts = append(parts, fmt.Sprintf("**Transcribed:** %s", status))
+	}
+
 	return strings.Join(parts, "\n")
 }
 
@@ -104,6 +121,7 @@ func GetFileProperties() []string {
 		PropertyKeyPublicURL,
 		PropertyKeyFilename,
 		PropertyKeyExtension,
+		PropertyKeyTranscribed,
 		PropertyKeyEnriched,
 	}
 }
